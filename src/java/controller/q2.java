@@ -5,22 +5,24 @@
 
 package controller;
 
-import dal.DAOAccount;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import jakarta.websocket.Session;
-import model.Account;
+import java.util.ArrayList;
+import java.util.List;
+import model.Student;
 
 /**
  *
  * @author HP
  */
-public class LoginServlet extends HttpServlet {
+@WebServlet(name="q2", urlPatterns={"/q2"})
+public class q2 extends HttpServlet {
    
     /** 
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
@@ -37,10 +39,10 @@ public class LoginServlet extends HttpServlet {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet LoginSevlet</title>");  
+            out.println("<title>Servlet q2</title>");  
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet LoginSevlet at " + request.getContextPath () + "</h1>");
+            out.println("<h1>Servlet q2 at " + request.getContextPath () + "</h1>");
             out.println("</body>");
             out.println("</html>");
         }
@@ -57,7 +59,7 @@ public class LoginServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
-        request.getRequestDispatcher("/views/login.jsp").forward(request, response);
+       request.getRequestDispatcher("views/q2.jsp").forward(request, response);
     } 
 
     /** 
@@ -70,25 +72,32 @@ public class LoginServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
-        DAOAccount daoAcc = new DAOAccount();
-        //jsp -> SERVLET => String
-        //SERVLET -> jsp => Object => convert 
-        String email = request.getParameter("email");
-        String password = request.getParameter("password");
-        //check xem tai khoan co ton tai trong db ko
-        Account acc = daoAcc.validateAccount(email, password);
-        if(acc == null) {
-            //khong ton tai account
-            request.setAttribute("mess", "email or password invalid");
-            request.setAttribute("email", email);
-            request.getRequestDispatcher("/views/login.jsp").forward(request, response);
+        String name = request.getParameter("name");
+        String class_raw = request.getParameter("class");
+        String gender = request.getParameter("gender");
+        String[] subjects = request.getParameterValues("subject");
+        // Set attributes to be forwarded to the JSP
+        request.setAttribute("name", name);
+        request.setAttribute("class_raw", class_raw);
+        request.setAttribute("gender", gender);
+        request.setAttribute("subjects", subjects);
+        //
+        Student student = new Student(name, class_raw, gender, subjects);
+        
+        HttpSession session = request.getSession();
+        
+        List<Student> listStudent = null;
+        if(session.getAttribute("listStu") == null) {
+            listStudent = new ArrayList<>();
         } else {
-            //ton tai
-            HttpSession session = request.getSession();
-            session.setAttribute("currAcc", acc);
-            //dieu huong den home
-            response.sendRedirect("home");
+            listStudent = (List<Student>)session.getAttribute("listStu");
         }
+        
+        
+        listStudent.add(student);
+        session.setAttribute("listStu", listStudent);
+        
+        request.getRequestDispatcher("views/q2.jsp").forward(request, response);
     }
 
     /** 
@@ -99,7 +108,5 @@ public class LoginServlet extends HttpServlet {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
-    public static void main(String[] args) {
-    }
-    
+
 }

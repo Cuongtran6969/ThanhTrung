@@ -23,7 +23,7 @@ public class DAOAccount extends DBContext {
             PreparedStatement ps = connection.prepareStatement(sql);
             ps.setString(1, email);
             ps.setString(2, password);
-            ResultSet rs = ps.executeQuery();
+            ResultSet rs = ps.executeQuery();//table
             while (rs.next()) {                
                 return new Account(
                         rs.getInt(1), rs.getString(2), 
@@ -77,7 +77,6 @@ public class DAOAccount extends DBContext {
             ps.setBoolean(6, acc.isIsAdmin());
             
             return ps.executeUpdate() > 0;
-            
         } catch (SQLException e) {
             System.out.println(e);
         }
